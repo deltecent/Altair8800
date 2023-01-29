@@ -17,9 +17,9 @@
 // WARNING: It is highly recommended to physically disable the PROTECT switch by
 //          disconnecting the GND wire from the switch before enabling this. The serial
 //          lines idle HIGH and the PROTECT switch will connect them to GND when pressed,
-//          creating a direct short and likely killing the A7 pin on the Arduino and/or 
+//          creating a direct short and likely killing the A7 pin on the Arduino and/or
 //          your connected serial device.
-#define USE_SERIAL_ON_A6A7 0
+#define USE_SERIAL_ON_A6A7 1
 
 
 // The pins driving the RX and TX LEDs located next to the Native USB port on the
@@ -32,17 +32,17 @@
 // Arduino Due provides a file system (via SD card)
 #define HOST_HAS_FILESYS
 #define HOST_FILESYS_FILE_TYPE File
-#define HOST_FILESYS_DIR_TYPE  File
+#define HOST_FILESYS_DIR_TYPE File
 
 
 #define MEMSIZE 0x10000
 
 #define HOST_STORAGESIZE due_storagesize
-#define HOST_BUFFERSIZE  0x100
+#define HOST_BUFFERSIZE 0x100
 
 #define HOST_PERFORMANCE_FACTOR 1.0
 
-#define HOST_NUM_SERIAL_PORTS   (3+USE_SERIAL_ON_A6A7+USE_SERIAL_ON_RXLTXL)
+#define HOST_NUM_SERIAL_PORTS (3 + USE_SERIAL_ON_A6A7 + USE_SERIAL_ON_RXLTXL)
 
 extern uint32_t due_storagesize;
 
@@ -50,11 +50,10 @@ extern uint32_t due_storagesize;
 // ------------------------------------------ switches
 
 
-inline byte host_read_sense_switches()
-{
+inline byte host_read_sense_switches() {
   // SW8...15  => PIOA, bits 12-15,17-20 (negative logic)
   word w = ~REG_PIOA_PDSR;
-  return ((w & 0xF000) / (1<<12)) | ((w & 0x1E0000) / (1<<13));
+  return ((w & 0xF000) / (1 << 12)) | ((w & 0x1E0000) / (1 << 13));
 }
 
 uint16_t host_read_addr_switches();
@@ -65,63 +64,89 @@ uint16_t host_read_addr_switches();
 /* reading global variables is faster than reading back the i/o register
    => INTE and WAIT are read often so we keep their state in a global variable */
 
-#define host_set_status_led_INT()     REG_PIOB_SODR = 1<<25
-#define host_set_status_led_WO()      REG_PIOC_CODR = 1<<28
-#define host_set_status_led_STACK()   REG_PIOC_SODR = 1<<26
-#define host_set_status_led_HLTA()    REG_PIOC_SODR = 1<<25
-#define host_set_status_led_M1()      REG_PIOC_SODR = 1<<23
-#define host_set_status_led_MEMR()    REG_PIOC_SODR = 1<<21
-#define host_set_status_led_INTE()    REG_PIOD_SODR = 1<<8;
-#define host_set_status_led_PROT()    REG_PIOB_SODR = 1<<27
-#define host_set_status_led_WAIT()  { REG_PIOC_SODR = 1<<29; status_wait = true; }
-#define host_set_status_led_HLDA()    REG_PIOB_SODR = 1<<26
+#define host_set_status_led_INT() REG_PIOB_SODR = 1 << 25
+#define host_set_status_led_WO() REG_PIOC_CODR = 1 << 28
+#define host_set_status_led_STACK() REG_PIOC_SODR = 1 << 26
+#define host_set_status_led_HLTA() REG_PIOC_SODR = 1 << 25
+#define host_set_status_led_M1() REG_PIOC_SODR = 1 << 23
+#define host_set_status_led_MEMR() REG_PIOC_SODR = 1 << 21
+#define host_set_status_led_INTE() REG_PIOD_SODR = 1 << 8;
+#define host_set_status_led_PROT() REG_PIOB_SODR = 1 << 27
+#define host_set_status_led_WAIT() \
+  { \
+    REG_PIOC_SODR = 1 << 29; \
+    status_wait = true; \
+  }
+#define host_set_status_led_HLDA() REG_PIOB_SODR = 1 << 26
 
-#define host_clr_status_led_INT()     REG_PIOB_CODR = 1<<25
-#define host_clr_status_led_WO()      REG_PIOC_SODR = 1<<28
-#define host_clr_status_led_STACK()   REG_PIOC_CODR = 1<<26
-#define host_clr_status_led_HLTA()    REG_PIOC_CODR = 1<<25
-#define host_clr_status_led_M1()      REG_PIOC_CODR = 1<<23
-#define host_clr_status_led_MEMR()    REG_PIOC_CODR = 1<<21
-#define host_clr_status_led_INTE()    REG_PIOD_CODR = 1<<8;
-#define host_clr_status_led_PROT()    REG_PIOB_CODR = 1<<27
-#define host_clr_status_led_WAIT()  { REG_PIOC_CODR = 1<<29; status_wait = false; }
-#define host_clr_status_led_HLDA()    REG_PIOB_CODR = 1<<26
+#define host_clr_status_led_INT() REG_PIOB_CODR = 1 << 25
+#define host_clr_status_led_WO() REG_PIOC_SODR = 1 << 28
+#define host_clr_status_led_STACK() REG_PIOC_CODR = 1 << 26
+#define host_clr_status_led_HLTA() REG_PIOC_CODR = 1 << 25
+#define host_clr_status_led_M1() REG_PIOC_CODR = 1 << 23
+#define host_clr_status_led_MEMR() REG_PIOC_CODR = 1 << 21
+#define host_clr_status_led_INTE() REG_PIOD_CODR = 1 << 8;
+#define host_clr_status_led_PROT() REG_PIOB_CODR = 1 << 27
+#define host_clr_status_led_WAIT() \
+  { \
+    REG_PIOC_CODR = 1 << 29; \
+    status_wait = false; \
+  }
+#define host_clr_status_led_HLDA() REG_PIOB_CODR = 1 << 26
 
-#define host_read_status_led_WAIT()   status_wait
-#define host_read_status_led_M1()     (REG_PIOC_PDSR & (1<<23))
-#define host_read_status_led_HLTA()   (REG_PIOC_PDSR & (1<<25))
-#define host_read_status_led_INTE()   status_inte
+#define host_read_status_led_WAIT() status_wait
+#define host_read_status_led_M1() (REG_PIOC_PDSR & (1 << 23))
+#define host_read_status_led_HLTA() (REG_PIOC_PDSR & (1 << 25))
+#define host_read_status_led_INTE() status_inte
 
 
-#if USE_IO_BUS>0
+#if USE_IO_BUS > 0
 // switch WAIT and DATA LEDs to inputs and turn on INP LED
-#define host_set_status_led_INP()   { REG_PIOD_ODR = 0xFF; REG_PIOC_ODR = 1<<29; REG_PIOC_SODR = 1<<22; }
-#define host_clr_status_led_INP()   { REG_PIOC_CODR = 1<<22; REG_PIOC_OER = 1<<29; REG_PIOD_OER = 0xFF; }
+#define host_set_status_led_INP() \
+  { \
+    REG_PIOD_ODR = 0xFF; \
+    REG_PIOC_ODR = 1 << 29; \
+    REG_PIOC_SODR = 1 << 22; \
+  }
+#define host_clr_status_led_INP() \
+  { \
+    REG_PIOC_CODR = 1 << 22; \
+    REG_PIOC_OER = 1 << 29; \
+    REG_PIOD_OER = 0xFF; \
+  }
 // switch WAIT LED to input and turn on OUT LED
-#define host_set_status_led_OUT()   { REG_PIOC_ODR  = 1<<29; REG_PIOC_SODR = 1<<24; }
-#define host_clr_status_led_OUT()   { REG_PIOC_CODR = 1<<24; REG_PIOC_OER  = 1<<29; }
+#define host_set_status_led_OUT() \
+  { \
+    REG_PIOC_ODR = 1 << 29; \
+    REG_PIOC_SODR = 1 << 24; \
+  }
+#define host_clr_status_led_OUT() \
+  { \
+    REG_PIOC_CODR = 1 << 24; \
+    REG_PIOC_OER = 1 << 29; \
+  }
 // read input from pins connected to DATA and WAIT LEDs
-#define host_read_data_bus            host_read_data_leds
-#define host_read_status_WAIT()       (REG_PIOC_PDSR & (1<<29))
+#define host_read_data_bus host_read_data_leds
+#define host_read_status_WAIT() (REG_PIOC_PDSR & (1 << 29))
 #else
-#define host_set_status_led_INP()     REG_PIOC_SODR = 1<<22;
-#define host_clr_status_led_INP()     REG_PIOC_CODR = 1<<22;
-#define host_set_status_led_OUT()     REG_PIOC_SODR = 1<<24
-#define host_clr_status_led_OUT()     REG_PIOC_CODR = 1<<24
+#define host_set_status_led_INP() REG_PIOC_SODR = 1 << 22;
+#define host_clr_status_led_INP() REG_PIOC_CODR = 1 << 22;
+#define host_set_status_led_OUT() REG_PIOC_SODR = 1 << 24
+#define host_clr_status_led_OUT() REG_PIOC_CODR = 1 << 24
 #endif
 
 
 // reading from memory (MEMR on, WO on)
-#define host_set_status_leds_READMEM()        REG_PIOC_SODR = 0x10200000
+#define host_set_status_leds_READMEM() REG_PIOC_SODR = 0x10200000
 
 // reading opcode from memory (MEMR on, M1 on, WO on)
-#define host_set_status_leds_READMEM_M1()     REG_PIOC_SODR = 0x10A00000
+#define host_set_status_leds_READMEM_M1() REG_PIOC_SODR = 0x10A00000
 
 // reading from stack (MEMR on, WO on, STACK on)
-#define host_set_status_leds_READMEM_STACK()  REG_PIOC_SODR = 0x14200000
+#define host_set_status_leds_READMEM_STACK() REG_PIOC_SODR = 0x14200000
 
 // writing to memory (MEMR off, WO off)
-#define host_set_status_leds_WRITEMEM()       REG_PIOC_CODR = 0x10200000
+#define host_set_status_leds_WRITEMEM() REG_PIOC_CODR = 0x10200000
 
 uint16_t host_read_status_leds();
 
@@ -129,8 +154,7 @@ uint16_t host_read_status_leds();
 // ----------------------------------------------------- address bus
 
 
-inline void host_set_addr_leds(uint16_t v)
-{
+inline void host_set_addr_leds(uint16_t v) {
   // A0..7  => 34, 35, ..., 41 (PIOC, bits 2-9)
   // A8..15 => 51, 50, ..., 44 (PIOC, bits 12-19)
   REG_PIOC_ODSR = (v & 0x00ff) * 4 + (v & 0xff00) * 16;
@@ -151,7 +175,7 @@ byte host_read_data_leds();
 // ---------------------------------------------------- interrupts
 
 // On the Due we are using real interrupts so nothing needs o be done here
-#define host_check_interrupts() while(0)
+#define host_check_interrupts() while (0)
 
 void host_serial_interrupts_pause();
 void host_serial_interrupts_resume();
